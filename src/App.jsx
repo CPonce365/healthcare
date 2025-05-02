@@ -1,17 +1,31 @@
 import React from 'react';
-import { Hero, Navbar,Companies, Feedback, Footer } from './components';
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Hero, Navbar, Companies, Feedback, Footer } from './components';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import './App.css';
 
 const App = () => {
   return (
-    <div>
+    <Router>
       <Navbar />
-      <Hero />
-      <Companies/>
-      <Feedback />
-      <Footer />
-    </div>
-  )
-}
+      <Routes>
+        {/* Homepage Route */}
+        <Route path="/" element={
+          <>
+            <Hero />
+            <Companies />
+            <Feedback />
+            <Footer />
+          </>
+        } />
+        
+        {/* Login & Signup Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
