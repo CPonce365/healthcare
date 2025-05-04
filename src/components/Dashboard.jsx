@@ -1,6 +1,8 @@
 import React from 'react';
 import { useFormData } from '../components/FormContext';
 import { Link } from 'react-router-dom';
+import Chatbot from './Chatbot';
+
 
 const Dashboard = () => {
   const { entries } = useFormData();
@@ -34,6 +36,15 @@ const Dashboard = () => {
                 + Add Entry
               </Link>
             </div>
+
+            <Chatbot />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* ...existing content... */}
+            </div>
+
+            <Chatbot />  {/* 👈 Add this below your dashboard grid */}
+
+
 
             {entries.length === 0 ? (
               <p className="text-gray-500">No entries yet.</p>
