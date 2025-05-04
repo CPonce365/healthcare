@@ -1,14 +1,13 @@
 import React from 'react';
 import { useFormData } from '../components/FormContext';
 import { Link } from 'react-router-dom';
-import Chatbot from './Chatbot';
-
+import Chatbot from './Chatbot'; // ✅ import stays
 
 const Dashboard = () => {
   const { entries } = useFormData();
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] px-6 py-10">
+    <div className="min-h-screen bg-[#f9fafb] px-6 py-10 relative">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-gray-800 mb-6">Dashboard</h1>
 
@@ -37,15 +36,6 @@ const Dashboard = () => {
               </Link>
             </div>
 
-            <Chatbot />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* ...existing content... */}
-            </div>
-
-            <Chatbot />  {/* 👈 Add this below your dashboard grid */}
-
-
-
             {entries.length === 0 ? (
               <p className="text-gray-500">No entries yet.</p>
             ) : (
@@ -61,6 +51,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ Floating Chatbot added at the bottom of Dashboard */}
+      <Chatbot />
     </div>
   );
 };
