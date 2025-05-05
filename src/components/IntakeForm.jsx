@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFormData } from '../components/FormContext';
-import { collection, addDoc } from "firebase/firestore";
-import { db } from '../firebase'; 
-
+import { getAuth } from 'firebase/auth';
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const IntakeForm = () => {
-  const { addEntry } = useFormData();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -25,12 +23,15 @@ const IntakeForm = () => {
     medications: '',
     allergies: '',
     painLevel: null,
-    status: 'Pending', // default for admin/dashboard updates
+    status: 'Pending',
   });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const handlePainClick = (level) => {
@@ -39,17 +40,27 @@ const IntakeForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert('You must be logged in to submit the form.');
+      return;
+    }
+
     try {
-      await addDoc(collection(db, "intakeForms"), form);
-      addEntry(form); // Local context update (optional)
+      await addDoc(collection(db, 'intakeForms'), {
+        ...form,
+        userId: user.uid,
+        timestamp: new Date(),
+      });
+
       navigate('/dashboard');
-    } catch (err) {g
-      console.error("Firestore error:", err);
-      alert("Failed to submit form. Try again.");
+    } catch (err) {
+      console.error('Error saving form:', err);
+      alert('Submission failed. Try again.');
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-white py-12 px-6">
@@ -58,8 +69,6 @@ const IntakeForm = () => {
         <p className="text-center text-gray-500 mt-2 mb-8">Let us know how we can help you!</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
-          {/* Name, Email/Phone */}
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
               <label className="block font-medium">First Name</label>
@@ -76,7 +85,6 @@ const IntakeForm = () => {
             <input type="text" name="emailOrPhone" value={form.emailOrPhone} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
           </div>
 
-          {/* DOB & Gender */}
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
               <label className="block font-medium">Date of Birth</label>
@@ -94,7 +102,6 @@ const IntakeForm = () => {
             </div>
           </div>
 
-          {/* Vitals */}
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1">
               <label className="block font-medium">Height (inches)</label>
@@ -110,26 +117,22 @@ const IntakeForm = () => {
             </div>
           </div>
 
-          {/* Symptoms */}
           <div>
             <label className="block font-medium">Describe your symptoms</label>
             <textarea name="symptoms" value={form.symptoms} onChange={handleChange} rows={4} required className="w-full mt-1 px-4 py-3 border rounded-md" />
           </div>
 
-          {/* Symptom Start Date */}
           <div>
             <label className="block font-medium">When did symptoms start?</label>
             <input type="date" name="symptomStartDate" value={form.symptomStartDate} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
           </div>
 
-          {/* Worsening */}
           <div>
             <label className="block font-medium mb-2">Are symptoms worsening?</label>
             <input type="checkbox" name="symptomsWorsening" checked={form.symptomsWorsening} onChange={handleChange} />
             <span className="ml-2 text-gray-700">Yes</span>
           </div>
 
-          {/* History */}
           <div>
             <label className="block font-medium">Chronic Conditions</label>
             <input type="text" name="chronicConditions" value={form.chronicConditions} onChange={handleChange} placeholder="e.g., Diabetes, Asthma" className="w-full mt-1 px-4 py-3 border rounded-md" />
@@ -145,7 +148,6 @@ const IntakeForm = () => {
             <input type="text" name="allergies" value={form.allergies} onChange={handleChange} className="w-full mt-1 px-4 py-3 border rounded-md" />
           </div>
 
-          {/* Pain Level */}
           <div>
             <label className="block font-medium mb-3">Pain Level (1–5)</label>
             <div className="flex gap-2">
@@ -166,7 +168,6 @@ const IntakeForm = () => {
             </div>
           </div>
 
-          {/* Submit */}
           <div className="pt-4">
             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md font-semibold text-lg transition">
               Submit
