@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormData } from '../components/FormContext';
+import { collection, addDoc } from "firebase/firestore";
+import { db } from '../firebase'; 
+
 
 const IntakeForm = () => {
   const { addEntry } = useFormData();
@@ -34,11 +37,19 @@ const IntakeForm = () => {
     setForm((prev) => ({ ...prev, painLevel: level }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addEntry(form);
-    navigate('/dashboard');
+  
+    try {
+      await addDoc(collection(db, "intakeForms"), form);
+      addEntry(form); // Local context update (optional)
+      navigate('/dashboard');
+    } catch (err) {g
+      console.error("Firestore error:", err);
+      alert("Failed to submit form. Try again.");
+    }
   };
+  
 
   return (
     <div className="min-h-screen bg-white py-12 px-6">
