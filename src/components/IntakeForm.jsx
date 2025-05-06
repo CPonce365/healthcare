@@ -1,178 +1,128 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
-import { addDoc, collection } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const IntakeForm = () => {
   const navigate = useNavigate();
-
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    emailOrPhone: '',
+    fullName: '',
     dateOfBirth: '',
     gender: '',
-    height: '',
-    weight: '',
-    temperature: '',
-    symptoms: '',
-    symptomStartDate: '',
-    symptomsWorsening: false,
-    chronicConditions: '',
-    medications: '',
-    allergies: '',
-    painLevel: null,
-    status: 'Pending',
+    contactInfo: '',
+    emergencyContact: '',
+    primaryCarePhysician: '',
+    smoke: false,
+    alcohol: false,
+    drugs: false,
+    exerciseFrequency: '',
+    sleepQuality: '',
+    diagnoses: {
+      diabetes: false,
+      highBloodPressure: false,
+      heartDisease: false,
+      asthma: false,
+      mentalHealth: false,
+      other: '',
+    },
+    hadCovid: '',
+    traveledRecently: '',
+    hasInsurance: '',
   });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
 
-  const handlePainClick = (level) => {
-    setForm((prev) => ({ ...prev, painLevel: level }));
+    if (name in form.diagnoses) {
+      setForm((prev) => ({
+        ...prev,
+        diagnoses: { ...prev.diagnoses, [name]: type === 'checkbox' ? checked : value },
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const auth = getAuth();
     const user = auth.currentUser;
-
-    if (!user) {
-      alert('You must be logged in to submit the form.');
-      return;
-    }
+    if (!user) return alert('Not signed in');
 
     try {
       await addDoc(collection(db, 'intakeForms'), {
         ...form,
         userId: user.uid,
-        timestamp: new Date(),
+        createdAt: serverTimestamp(),
       });
-
       navigate('/dashboard');
     } catch (err) {
-      console.error('Error saving form:', err);
-      alert('Submission failed. Try again.');
+      console.error('Error submitting intake form:', err);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white py-12 px-6">
+    <div className="min-h-screen bg-white py-10 px-6">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800">Health Intake Form</h1>
-        <p className="text-center text-gray-500 mt-2 mb-8">Let us know how we can help you!</p>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+          {/* Basic Info */}
+          <input name="fullName" value={form.fullName} onChange={handleChange} required placeholder="Full Name" className="w-full border p-3 rounded" />
+          <input type="date" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} required className="w-full border p-3 rounded" />
+          <select name="gender" value={form.gender} onChange={handleChange} required className="w-full border p-3 rounded">
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+            <option>Prefer not to say</option>
+          </select>
+          <input name="contactInfo" value={form.contactInfo} onChange={handleChange} placeholder="Contact Info (Phone or Email)" className="w-full border p-3 rounded" />
+          <input name="emergencyContact" value={form.emergencyContact} onChange={handleChange} placeholder="Emergency Contact Name & Number" className="w-full border p-3 rounded" />
+          <input name="primaryCarePhysician" value={form.primaryCarePhysician} onChange={handleChange} placeholder="Primary Care Physician (Optional)" className="w-full border p-3 rounded" />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1">
-              <label className="block font-medium">First Name</label>
-              <input type="text" name="firstName" value={form.firstName} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-            </div>
-            <div className="flex-1">
-              <label className="block font-medium">Last Name</label>
-              <input type="text" name="lastName" value={form.lastName} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-            </div>
+          {/* Lifestyle */}
+          <label className="block">Do you smoke? <input type="checkbox" name="smoke" checked={form.smoke} onChange={handleChange} /></label>
+          <label className="block">Do you consume alcohol? <input type="checkbox" name="alcohol" checked={form.alcohol} onChange={handleChange} /></label>
+          <label className="block">Do you use recreational drugs? <input type="checkbox" name="drugs" checked={form.drugs} onChange={handleChange} /></label>
+          <input name="exerciseFrequency" value={form.exerciseFrequency} onChange={handleChange} placeholder="Exercise Frequency" className="w-full border p-3 rounded" />
+          <input name="sleepQuality" value={form.sleepQuality} onChange={handleChange} placeholder="Sleep Quality" className="w-full border p-3 rounded" />
+
+          {/* Diagnoses */}
+          <div className="space-y-2">
+            <label><input type="checkbox" name="diabetes" checked={form.diagnoses.diabetes} onChange={handleChange} /> Diabetes</label><br />
+            <label><input type="checkbox" name="highBloodPressure" checked={form.diagnoses.highBloodPressure} onChange={handleChange} /> High Blood Pressure</label><br />
+            <label><input type="checkbox" name="heartDisease" checked={form.diagnoses.heartDisease} onChange={handleChange} /> Heart Disease</label><br />
+            <label><input type="checkbox" name="asthma" checked={form.diagnoses.asthma} onChange={handleChange} /> Asthma</label><br />
+            <label><input type="checkbox" name="mentalHealth" checked={form.diagnoses.mentalHealth} onChange={handleChange} /> Mental Health Disorders</label><br />
+            <input name="other" value={form.diagnoses.other} onChange={handleChange} placeholder="Other Diagnosis" className="w-full border p-3 rounded" />
           </div>
 
-          <div>
-            <label className="block font-medium">Email or Phone</label>
-            <input type="text" name="emailOrPhone" value={form.emailOrPhone} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-          </div>
+          {/* COVID/Travel/Insurance */}
+          <select name="hadCovid" value={form.hadCovid} onChange={handleChange} required className="w-full border p-3 rounded">
+            <option value="">Have you had COVID-19 in the past 3 months?</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
 
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1">
-              <label className="block font-medium">Date of Birth</label>
-              <input type="date" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-            </div>
-            <div className="flex-1">
-              <label className="block font-medium">Gender</label>
-              <select name="gender" value={form.gender} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md">
-                <option value="">Select...</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
-                <option>Prefer not to say</option>
-              </select>
-            </div>
-          </div>
+          <select name="traveledRecently" value={form.traveledRecently} onChange={handleChange} required className="w-full border p-3 rounded">
+            <option value="">Have you traveled recently?</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
 
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1">
-              <label className="block font-medium">Height (inches)</label>
-              <input type="number" name="height" value={form.height} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-            </div>
-            <div className="flex-1">
-              <label className="block font-medium">Weight (lbs)</label>
-              <input type="number" name="weight" value={form.weight} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-            </div>
-            <div className="flex-1">
-              <label className="block font-medium">Temperature (°F)</label>
-              <input type="number" name="temperature" value={form.temperature} onChange={handleChange} className="w-full mt-1 px-4 py-3 border rounded-md" />
-            </div>
-          </div>
+          <select name="hasInsurance" value={form.hasInsurance} onChange={handleChange} required className="w-full border p-3 rounded">
+            <option value="">Do you have health insurance?</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
 
-          <div>
-            <label className="block font-medium">Describe your symptoms</label>
-            <textarea name="symptoms" value={form.symptoms} onChange={handleChange} rows={4} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-          </div>
-
-          <div>
-            <label className="block font-medium">When did symptoms start?</label>
-            <input type="date" name="symptomStartDate" value={form.symptomStartDate} onChange={handleChange} required className="w-full mt-1 px-4 py-3 border rounded-md" />
-          </div>
-
-          <div>
-            <label className="block font-medium mb-2">Are symptoms worsening?</label>
-            <input type="checkbox" name="symptomsWorsening" checked={form.symptomsWorsening} onChange={handleChange} />
-            <span className="ml-2 text-gray-700">Yes</span>
-          </div>
-
-          <div>
-            <label className="block font-medium">Chronic Conditions</label>
-            <input type="text" name="chronicConditions" value={form.chronicConditions} onChange={handleChange} placeholder="e.g., Diabetes, Asthma" className="w-full mt-1 px-4 py-3 border rounded-md" />
-          </div>
-
-          <div>
-            <label className="block font-medium">Current Medications</label>
-            <input type="text" name="medications" value={form.medications} onChange={handleChange} className="w-full mt-1 px-4 py-3 border rounded-md" />
-          </div>
-
-          <div>
-            <label className="block font-medium">Allergies</label>
-            <input type="text" name="allergies" value={form.allergies} onChange={handleChange} className="w-full mt-1 px-4 py-3 border rounded-md" />
-          </div>
-
-          <div>
-            <label className="block font-medium mb-3">Pain Level (1–5)</label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((level) => (
-                <button
-                  type="button"
-                  key={level}
-                  onClick={() => handlePainClick(level)}
-                  className={`flex flex-col items-center justify-center w-14 h-14 rounded-full border ${
-                    form.painLevel === level
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-800 border-gray-300'
-                  }`}
-                >
-                  <span className="font-bold">{level}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="pt-4">
-            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md font-semibold text-lg transition">
-              Submit
-            </button>
-          </div>
+          <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition">
+            Submit Form
+          </button>
         </form>
       </div>
     </div>

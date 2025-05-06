@@ -6,6 +6,8 @@ import Signup from './components/SignUp';
 import Dashboard from './components/Dashboard';
 import IntakeForm from './components/IntakeForm';
 import { FormProvider } from './components/FormContext';
+import Symptoms from './components/Symptoms'; 
+import SymptomsForm from './components/SymptomsForm'; 
 import './App.css';
 
 const AppContent = () => {
@@ -30,7 +32,14 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/intake" element={<IntakeForm />} />
+        <Route path="/intake" element={<IntakeForm/>} />
+        <Route path="/symptoms" element={<Symptoms/>} />
+        <Route path="/symptomsform" element={<SymptomsForm />} />
+        
+        
+
+        
+
       </Routes>
     </>
   );

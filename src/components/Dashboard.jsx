@@ -20,19 +20,26 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (!currentUser) {
-        navigate('/login');
-      } else {
-        setUser(currentUser);
-        fetchEntries(currentUser.uid);
-      }
-    });
+  // 1. Auth listener
+useEffect(() => {
+  const auth = getAuth();
+  const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    if (!currentUser) {
+      navigate('/login');
+    } else {
+      setUser(currentUser); // ✅ Only set user here
+    }
+  });
+  return () => unsubscribe();
+}, [navigate]);
 
-    return () => unsubscribe();
-  }, [navigate]);
+// 2. Fetch entries AFTER user is set
+useEffect(() => {
+  if (user) {
+    fetchEntries(user.uid); 
+  }
+}, [user]);
+
 
   const fetchEntries = async (uid) => {
     const q = query(collection(db, 'intakeForms'), where('userId', '==', uid));
@@ -94,23 +101,28 @@ const Dashboard = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-          >
-            Logout
-          </button>
+          
         </div>
 
         <div className="flex flex-wrap gap-4 mb-10">
-          {['Symptoms', 'Medications', 'Exercise', 'Diet'].map((tab) => (
-            <button
-              key={tab}
-              className="px-5 py-2 bg-white border border-gray-300 rounded-lg text-lg font-medium hover:shadow-md"
-            >
-              {tab}
-            </button>
-          ))}
+          {['Symptoms', 'Medications', 'Exercise', 'Diet'].map((tab) =>
+            tab === 'Symptoms' ? (
+              <Link
+                key={tab}
+                to="/symptoms"
+                className="px-5 py-2 bg-white border border-gray-300 rounded-lg text-lg font-medium hover:shadow-md"
+              >
+                {tab}
+              </Link>
+            ) : (
+              <button
+                key={tab}
+                className="px-5 py-2 bg-white border border-gray-300 rounded-lg text-lg font-medium hover:shadow-md"
+              >
+                {tab}
+              </button>
+            )
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -122,10 +134,7 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">General Health Intake Form</h2>
-              <Link
-                to="/intake"
-                className="text-[#20B486] font-medium hover:underline text-sm"
-              >
+              <Link to="/intake" className="text-[#20B486] font-medium hover:underline text-sm">
                 + Add Entry
               </Link>
             </div>
@@ -135,17 +144,10 @@ const Dashboard = () => {
             ) : (
               <ul className="space-y-2">
                 {entries.map((entry) => (
-                  <li
-                    key={entry.id}
-                    className="p-3 bg-[#f0fdf4] rounded-md border flex justify-between items-start"
-                  >
+                  <li key={entry.id} className="p-3 bg-[#f0fdf4] rounded-md border flex justify-between items-start">
                     <div>
-                      <h3 className="text-md font-bold">
-                        {entry.firstName} {entry.lastName}
-                      </h3>
-                      <p className="text-sm text-gray-700">
-                        {entry.symptoms || 'No symptoms provided.'}
-                      </p>
+                      <h3 className="text-md font-bold">{entry.fullName || 'No name provided'}</h3>
+                      <p className="text-sm text-gray-700">{entry.dateOfBirth || 'No DOB provided.'}</p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -171,36 +173,47 @@ const Dashboard = () => {
 
       {editingEntry && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 overflow-y-auto">
-          <div className="bg-white rounded-lg p-6 w-full max-w-3xl shadow-lg space-y-4">
-            <h3 className="text-lg font-bold mb-4">Edit Health Intake Form</h3>
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl shadow-lg space-y-4">
+            <h3 className="text-lg font-bold mb-4">Edit Intake Form</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="firstName" value={editForm.firstName || ''} onChange={handleEditChange} className="border p-2 rounded-md" placeholder="First Name" />
-              <input name="lastName" value={editForm.lastName || ''} onChange={handleEditChange} className="border p-2 rounded-md" placeholder="Last Name" />
-              <input name="emailOrPhone" value={editForm.emailOrPhone || ''} onChange={handleEditChange} className="border p-2 rounded-md" placeholder="Email or Phone" />
+              <input name="fullName" value={editForm.fullName || ''} onChange={handleEditChange} className="border p-2 rounded-md" placeholder="Full Name" />
               <input type="date" name="dateOfBirth" value={editForm.dateOfBirth || ''} onChange={handleEditChange} className="border p-2 rounded-md" />
               <select name="gender" value={editForm.gender || ''} onChange={handleEditChange} className="border p-2 rounded-md">
                 <option value="">Select Gender</option>
                 <option>Male</option>
                 <option>Female</option>
                 <option>Other</option>
+                <option>Prefer not to say</option>
               </select>
-              <input name="height" value={editForm.height || ''} onChange={handleEditChange} placeholder="Height" className="border p-2 rounded-md" />
-              <input name="weight" value={editForm.weight || ''} onChange={handleEditChange} placeholder="Weight" className="border p-2 rounded-md" />
-              <input name="temperature" value={editForm.temperature || ''} onChange={handleEditChange} placeholder="Temperature" className="border p-2 rounded-md" />
-              <input type="date" name="symptomStartDate" value={editForm.symptomStartDate || ''} onChange={handleEditChange} className="border p-2 rounded-md" />
-              <input name="chronicConditions" value={editForm.chronicConditions || ''} onChange={handleEditChange} placeholder="Chronic Conditions" className="border p-2 rounded-md" />
-              <input name="medications" value={editForm.medications || ''} onChange={handleEditChange} placeholder="Medications" className="border p-2 rounded-md" />
-              <input name="allergies" value={editForm.allergies || ''} onChange={handleEditChange} placeholder="Allergies" className="border p-2 rounded-md" />
-              <textarea name="symptoms" value={editForm.symptoms || ''} onChange={handleEditChange} placeholder="Symptoms" className="border p-2 rounded-md col-span-2" />
-              <select name="painLevel" value={editForm.painLevel || ''} onChange={handleEditChange} className="border p-2 rounded-md">
-                <option value="">Pain Level</option>
-                {[1, 2, 3, 4, 5].map((level) => (
-                  <option key={level} value={level}>{level}</option>
-                ))}
-              </select>
+              <input name="contactInfo" value={editForm.contactInfo || ''} onChange={handleEditChange} placeholder="Contact Info" className="border p-2 rounded-md" />
+              <input name="emergencyContact" value={editForm.emergencyContact || ''} onChange={handleEditChange} placeholder="Emergency Contact" className="border p-2 rounded-md" />
+              <input name="primaryCarePhysician" value={editForm.primaryCarePhysician || ''} onChange={handleEditChange} placeholder="Primary Care Physician" className="border p-2 rounded-md" />
               <label className="flex items-center gap-2">
-                <input type="checkbox" name="symptomsWorsening" checked={editForm.symptomsWorsening || false} onChange={handleEditChange} />
-                Symptoms worsening?
+                <input type="checkbox" name="smoking" checked={editForm.smoking || false} onChange={handleEditChange} />
+                Do you smoke?
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" name="alcohol" checked={editForm.alcohol || false} onChange={handleEditChange} />
+                Do you consume alcohol?
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" name="drugs" checked={editForm.drugs || false} onChange={handleEditChange} />
+                Use recreational drugs?
+              </label>
+              <input name="exercise" value={editForm.exercise || ''} onChange={handleEditChange} placeholder="Exercise frequency" className="border p-2 rounded-md" />
+              <input name="sleep" value={editForm.sleep || ''} onChange={handleEditChange} placeholder="Sleep quality" className="border p-2 rounded-md" />
+              <textarea name="diagnosedConditions" value={editForm.diagnosedConditions || ''} onChange={handleEditChange} placeholder="Diagnosed Conditions" className="border p-2 rounded-md col-span-2" />
+              <label className="flex items-center gap-2">
+                <input type="checkbox" name="covidHistory" checked={editForm.covidHistory || false} onChange={handleEditChange} />
+                Had COVID in the past 3 months?
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" name="recentTravel" checked={editForm.recentTravel || false} onChange={handleEditChange} />
+                Traveled recently?
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" name="hasInsurance" checked={editForm.hasInsurance || false} onChange={handleEditChange} />
+                Do you have health insurance?
               </label>
             </div>
             <div className="flex justify-end gap-2 mt-4">
