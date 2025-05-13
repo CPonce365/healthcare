@@ -99,10 +99,16 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-[#f9fafb] px-6 py-10 relative">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
-          
-        </div>
+      <div className="flex justify-between items-center mb-6">
+  <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
+  <button
+    onClick={handleLogout}
+    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+  >
+    Log Out
+  </button>
+</div>
+
 
         <div className="flex flex-wrap gap-4 mb-10">
           {['Symptoms', 'Medications', 'Exercise', 'Diet'].map((tab) =>
