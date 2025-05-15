@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { Link } from 'react-router-dom';
 
 const Symptoms = () => {
@@ -32,6 +32,15 @@ const Symptoms = () => {
     const sorted = data.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds);
     setSymptomsList(sorted);
   };
+const handleLogout = async () => {
+  const auth = getAuth();
+  try {
+    await signOut(auth);
+    window.location.href = '/login';
+  } catch (err) {
+    console.error('Logout failed:', err);
+  }
+};
 
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, 'symptomEntries', id));
@@ -75,6 +84,9 @@ const Symptoms = () => {
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+
+
         {/* ✅ SYMPTOM LIST */}
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex justify-between items-center mb-4">
