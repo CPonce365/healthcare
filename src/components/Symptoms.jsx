@@ -12,6 +12,7 @@ const Symptoms = () => {
   const [aiSummary, setAiSummary] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), (currentUser) => {
@@ -34,6 +35,7 @@ const Symptoms = () => {
     const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     const sorted = data.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds);
     setSymptomsList(sorted);
+    calculateHealthStatus(sorted); 
   };
 
   const handleDelete = async (id) => {
@@ -84,6 +86,8 @@ const Symptoms = () => {
     }
   };
 
+ 
+
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10 relative">
       {/* ✅ Log Out (top-right corner) */}
@@ -114,6 +118,9 @@ const Symptoms = () => {
               {aiSummary}
             </div>
           )}
+
+          
+
 
           {symptomsList.length === 0 ? (
             <p className="text-gray-500">No symptoms recorded.</p>
