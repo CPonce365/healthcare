@@ -34,7 +34,15 @@ app.post('/chat', async (req, res) => {
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo',
-      messages: [{ role: 'user', content: message }],
+      messages: [
+  {
+    role: 'system',
+    content:
+      "You are a friendly, knowledgeable health assistant. Respond with brief, clear explanations and follow-up questions when needed. If symptoms suggest a condition, explain it simply and suggest next steps, like seeing a doctor or resting.",
+  },
+  { role: 'user', content: message },
+],
+
     });
 
     res.json({ reply: response.choices[0].message.content });
