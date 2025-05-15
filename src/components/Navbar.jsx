@@ -16,7 +16,7 @@ const Navbar = () => {
 
         <div className='hidden md:flex items-center'></div>
 
-        {/* Desktop Links */}
+        
         <div className='hidden md:flex'>
           <Link to="/login">
             <button className='flex justify-between items-center bg-transparent px-6 gap-2'>
@@ -31,13 +31,13 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Mobile Hamburger */}
+        
         <div className='md:hidden' onClick={handleClick}>
           <img src={toggle ? close : hamburgerMenu} alt="Menu Toggle" />
         </div>
       </div>
 
-      {/* Mobile Dropdown */}
+      
       <div className={toggle ? 'absolute z-10 p-4 bg-white w-full px-8 md:hidden border-b' : 'hidden'}>
         <ul>
           <div className='flex flex-col my-4 gap-4'>

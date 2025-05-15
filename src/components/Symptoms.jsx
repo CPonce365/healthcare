@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Symptoms = () => {
   const [symptomsList, setSymptomsList] = useState([]);
@@ -11,16 +11,19 @@ const Symptoms = () => {
   const [user, setUser] = useState(null);
   const [aiSummary, setAiSummary] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // ✅ Listen for user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), (currentUser) => {
-      if (currentUser) setUser(currentUser);
+      if (!currentUser) {
+        navigate('/login');
+      } else {
+        setUser(currentUser);
+      }
     });
     return unsubscribe;
-  }, []);
+  }, [navigate]);
 
-  // ✅ Fetch symptoms once user is known
   useEffect(() => {
     if (user) fetchSymptoms();
   }, [user]);
@@ -32,15 +35,6 @@ const Symptoms = () => {
     const sorted = data.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds);
     setSymptomsList(sorted);
   };
-const handleLogout = async () => {
-  const auth = getAuth();
-  try {
-    await signOut(auth);
-    window.location.href = '/login';
-  } catch (err) {
-    console.error('Logout failed:', err);
-  }
-};
 
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, 'symptomEntries', id));
@@ -81,13 +75,29 @@ const handleLogout = async () => {
     setLoading(false);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(getAuth());
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
+    <div className="min-h-screen bg-gray-50 px-6 py-10 relative">
+      {/* ✅ Log Out (top-right corner) */}
+      <div className="absolute top-6 right-6">
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Log Out
+        </button>
+      </div>
+
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-
-
-        {/* ✅ SYMPTOM LIST */}
+        {/* SYMPTOM LIST */}
         <div className="bg-white p-6 rounded-lg shadow border">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold">Logged Symptoms</h2>
@@ -110,7 +120,10 @@ const handleLogout = async () => {
           ) : (
             <ul className="space-y-4">
               {symptomsList.map((item) => (
-                <li key={item.id} className="bg-gray-100 p-4 rounded-md flex justify-between items-start">
+                <li
+                  key={item.id}
+                  className="bg-gray-100 p-4 rounded-md flex justify-between items-start"
+                >
                   <div className="flex-1">
                     <p className="text-gray-800 font-semibold">{item.symptoms || 'No description'}</p>
                     <p className="text-sm text-gray-500">{item.symptomStartDate && `Started: ${item.symptomStartDate}`}</p>
@@ -135,7 +148,7 @@ const handleLogout = async () => {
           )}
         </div>
 
-        {/* ✅ ADD SYMPTOM FORM LINK */}
+        {/* ADD SYMPTOM LINK */}
         <div className="bg-white p-6 rounded-lg shadow border flex flex-col justify-between">
           <h2 className="text-2xl font-semibold mb-6">Add a Symptom</h2>
           <p className="text-gray-600 mb-4">Click below to fill out a detailed symptom form.</p>
@@ -148,7 +161,7 @@ const handleLogout = async () => {
         </div>
       </div>
 
-      {/* ✅ EDIT MODAL */}
+      {/* EDIT MODAL */}
       {editingEntry && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-3xl shadow space-y-4 overflow-y-auto max-h-[90vh]">

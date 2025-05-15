@@ -27,13 +27,13 @@ useEffect(() => {
     if (!currentUser) {
       navigate('/login');
     } else {
-      setUser(currentUser); // ✅ Only set user here
+      setUser(currentUser); //Sets the user
     }
   });
   return () => unsubscribe();
 }, [navigate]);
 
-// 2. Fetch entries AFTER user is set
+//Fetch entries
 useEffect(() => {
   if (user) {
     fetchEntries(user.uid); 

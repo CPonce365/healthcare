@@ -1,5 +1,4 @@
 import React from 'react'
-import { blogImg1 } from '../assets'
 
 
 const Card = ({course}) => {

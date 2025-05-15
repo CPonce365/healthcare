@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Hero, Navbar, Companies, Feedback, Footer } from './components';
 import Login from './components/Login';
@@ -12,7 +11,9 @@ import './App.css';
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavbar = location.pathname.startsWith('/dashboard');
+  const hideNavbar = ['/dashboard', '/intake', '/symptoms', '/symptomsform'].some(path =>
+  location.pathname.startsWith(path)
+);
 
   return (
     <>
