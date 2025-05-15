@@ -138,7 +138,7 @@ const Chatbot = () => {
             className="p-4 font-semibold border-b cursor-move select-none"
             onMouseDown={handleDragStart}
           >
-            🤖 HealthBot
+             Symptora
           </div>
 
           {/* Messages Area */}

@@ -1,7 +1,5 @@
-// src/components/firebase.js (or move to src/firebase.js if cleaner)
-
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth"; // 🔥 Needed for login/signup
+import { getAuth } from "firebase/auth"; //needed for login/signup
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
@@ -15,9 +13,9 @@ const firebaseConfig = {
   measurementId: "G-2EYDMC18MG"
 };
 
-// Initialize Firebase
+// Firebase intialize
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app)
 export { db }
 const analytics = getAnalytics(app);
-export const auth = getAuth(app); // ✅ EXPORT this so you can use it in Login/Signup
+export const auth = getAuth(app); // export

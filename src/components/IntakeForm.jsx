@@ -70,7 +70,7 @@ const IntakeForm = () => {
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-gray-800">Health Intake Form</h1>
         <form onSubmit={handleSubmit} className="space-y-6 mt-8">
-          {/* Basic Info */}
+         
           <input name="fullName" value={form.fullName} onChange={handleChange} required placeholder="Full Name" className="w-full border p-3 rounded" />
           <input type="date" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} required className="w-full border p-3 rounded" />
           <select name="gender" value={form.gender} onChange={handleChange} required className="w-full border p-3 rounded">
@@ -84,14 +84,14 @@ const IntakeForm = () => {
           <input name="emergencyContact" value={form.emergencyContact} onChange={handleChange} placeholder="Emergency Contact Name & Number" className="w-full border p-3 rounded" />
           <input name="primaryCarePhysician" value={form.primaryCarePhysician} onChange={handleChange} placeholder="Primary Care Physician (Optional)" className="w-full border p-3 rounded" />
 
-          {/* Lifestyle */}
+          
           <label className="block">Do you smoke? <input type="checkbox" name="smoke" checked={form.smoke} onChange={handleChange} /></label>
           <label className="block">Do you consume alcohol? <input type="checkbox" name="alcohol" checked={form.alcohol} onChange={handleChange} /></label>
           <label className="block">Do you use recreational drugs? <input type="checkbox" name="drugs" checked={form.drugs} onChange={handleChange} /></label>
           <input name="exerciseFrequency" value={form.exerciseFrequency} onChange={handleChange} placeholder="Exercise Frequency" className="w-full border p-3 rounded" />
           <input name="sleepQuality" value={form.sleepQuality} onChange={handleChange} placeholder="Sleep Quality" className="w-full border p-3 rounded" />
 
-          {/* Diagnoses */}
+          
           <div className="space-y-2">
             <label><input type="checkbox" name="diabetes" checked={form.diagnoses.diabetes} onChange={handleChange} /> Diabetes</label><br />
             <label><input type="checkbox" name="highBloodPressure" checked={form.diagnoses.highBloodPressure} onChange={handleChange} /> High Blood Pressure</label><br />
@@ -101,7 +101,7 @@ const IntakeForm = () => {
             <input name="other" value={form.diagnoses.other} onChange={handleChange} placeholder="Other Diagnosis" className="w-full border p-3 rounded" />
           </div>
 
-          {/* COVID/Travel/Insurance */}
+          
           <select name="hadCovid" value={form.hadCovid} onChange={handleChange} required className="w-full border p-3 rounded">
             <option value="">Have you had COVID-19 in the past 3 months?</option>
             <option>Yes</option>
